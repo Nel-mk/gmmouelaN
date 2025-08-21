@@ -1,0 +1,25 @@
+body {
+    background-color: #6f42c1;/* Purple background */
+}
+
+.programme{
+    border-radius: 50% 50% 63% 37% / 31% 14% 86% 69% ; /* Rounded corners */
+     border: 2px solid #28a745; /* bordure verte */
+     box-shadow: 0 0 20px rgba(40, 167, 69, 0.6); /* halo flou vert */
+}
+
+.evenement{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+/* footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+{
+  border: 2px solid #28a745;
+  box-shadow: 0 0 20px rgba(40, 167, 69, 0.6); vert translucide 
+  padding: 20px;
+  background: white; */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
