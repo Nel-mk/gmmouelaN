@@ -16,3 +16,15 @@ entreQuantite.addEventListener("input", ()=> {
 
 });
 
+// Récupérer tous les liens du menu
+const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+
+// Parcourir les liens et activer celui correspondant à la page courante
+navLinks.forEach(link => {
+  // Comparer l'URL du lien avec l'URL actuelle
+  if (link.href === window.location.href) {
+    link.classList.add('active');
+  } else {
+    link.classList.remove('active');
+  }
+});
