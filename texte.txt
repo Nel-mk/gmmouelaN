@@ -1,0 +1,55 @@
+premièrement il faut importer le srcipt paypal en remplaceant la valeur de ton ID
+dans notre script on peut utiliser le bouton paypal 
+1️⃣ Charger le SDK PayPal
+
+Avant ce script, tu dois inclure le SDK PayPal dans ton HTML :
+<script src="https://www.paypal.com/sdk/js?client-id=TON_CLIENT_ID&currency=EUR"></script>
+TON_CLIENT_ID → tu le récupères depuis ton compte PayPal Business.
+currency=EUR → définit la devise.
+
+
+2️⃣ Conteneur pour le bouton
+Dans ton HTML, il te faut un div où le bouton va apparaître :
+<div id="paypal-button-container"></div>
+
+
+<script> 
+paypal.Buttons({  // attention, c'est Buttons avec B majuscule
+    createOrder: function(data, actions){
+        return actions.order.create({   // il manquait return et order.create
+            purchase_units: [{
+                amount: {
+                    value: '0.01'  // montant
+                }
+            }]
+        });
+    },
+    onApprove: function(data, actions){
+        return actions.order.capture().then(function(details){
+            alert("Transaction OK : " + details.payer.name.given_name);
+        });
+    },
+    onError: function(err){
+        console.error('Payment Error:', err);
+        alert("Paiement échoué !");
+    }
+}).render('#paypal-button-container');
+ </srcipt>
+
+Chaque fois que la quantité change, on vide le conteneur et on crée autant de blocs qu’il y a de tickets.
+
+Chaque bloc contient :
+
+un champ Nom
+
+un champ Email
+
+un champ Téléphone
+
+Tous les champs sont required, donc obligatoires avant de soumettre.
+
+Les name sont dynamiques (participant1_nom, participant1_email, etc.) pour pouvoir les récupérer facilement côté serveur ou JS.
+
+toFixed(2)
+
+But : formater un nombre pour qu’il ait exactement 2 chiffres après la virgule, ce qui est standard pour l’argent.
