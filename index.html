@@ -15,25 +15,27 @@
 </head>
 <body>
     <div class="container-fluid p-0">
+         <!--GESTION DU MENU DE NAVIGUATION -->
         <header >
             <nav class="navbar navbar-expand-lg navbar-dark bg-white ">
                 <div class="container-fluid">
                     <a class="navbar-brand text-dark" href="#">
-                        <img src="image/GM LOGO NOIR SANS FOND.png" alt="Logo" width="70" height="70" class="d-inline-block align-text-top">
+                        <img src="image/GM LOGO NOIR SANS FOND.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top">
                         </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <p>GM MOUELA SHOP</p>
+                    <button class="navbar-toggler bg-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
-                    <div class="collapse navbar-collapse bg-dark " id="navbarNav">
+                    <div class="collapse navbar-collapse " id="navbarNav">
                         <ul class="navbar-nav ms-auto ">
                             <li class="nav-item">
-                                <a class="nav-link active text-dark" aria-current="page" href="index.html">Accueil</a>
+                                <a class="nav-link fw-bold active text-dark" aria-current="page" href="index.html">Accueil</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" href="html/ticket.html">Achat Ticket</a>
+                                <a class="nav-link fw-bold text-dark" href="html/ticket.html">Achat Ticket</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" href="#contact">Contact-info</a>
+                                <a class="nav-link fw-bold text-dark" href="#contact">Contact-info</a>
                             </li>
                         </ul>
                     </div>
@@ -41,48 +43,71 @@
             </nav>
     </header>
 
+        <!--Gestion de la banniere -->
     <section class="banner ">
         <img src="image/CD-TICKET.jpg" alt=" image de la bannière" class="img-fluid w-100 border-bottom border-warning border-5">
     </section>
 
-  <!--  <div class="row text-center ">
-        <div class="col-md-4 bg-warning text-white p-3 evenement">
-            <p>
-                <i class="bi bi-calendar-event"></i> 13 Décembre 2025
-            </p>
-            <p>
-                <i class="bi bi-clock"></i>-15H-
-            </p>
-            <p>
-                <i class="bi bi-geo-alt"></i>Salle : TEATRO MOLARCHI
-            </p>
-        </div>
-        
-    </div>
--->
+     <!--GESTION DE LA PRESENTATION -->
     <div class="row">
-        <div class="text-center mt-5 text-white ">
-            <h1>Bienvenue à GM MOUELA SHOP</h1>
-            <p>Prends ton ticket et viens profiter du mood GM</p>
+        <div class="text-center mt-5 text-white presentation">
+            <h1 class="fw-bold display-4" style="letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">Bienvenue à GM MOUELA SHOP</h1>
+            <p class="fs-5 " style="text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);">Prends ton ticket et viens profiter du mood GM</p>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="text-center mt-5"> 
-            <div class="evenement text-center text-white">
-                <i class="bi bi-cash-coin"> Standard : 50&nbsp;€</i><br>
-                <i class="bi bi-cash-coin"> Vip : 70&nbsp;€</i>
-                <h3>Pour chaque ticket acheter un t-shirt offert </h3>
+        <div class="row mt-5">
+            <div class="col-md-6 text-center ">
+            <img src="image/event.jpeg" alt="Event Image" class="img-fluid rounded-circle shadow-lg w-50 w-md-25 mx-auto d-block">
+            </div>
+            <div class="col-md-6 d-flex flex-column justify-content-center mt-4">
+            <h2 class="text-uppercase fw-bold text-warning mb-3" style="letter-spacing: 2px;">Pourquoi nous choisir ?</h2>
+            <p class="fs-5 text-white">
+                Chez GM MOUELA SHOP, nous vous offrons une expérience unique et mémorable. Profitez de nos événements exclusifs, de nos tarifs compétitifs et d'une ambiance chaleureuse.
+            </p>
+            <ul class="list-unstyled mt-3">
+                <li class="mb-2">
+                <i class="bi bi-check-circle-fill text-warning"></i> <span class="text-dark">Des événements de qualité</span>
+                </li>
+                <li class="mb-2">
+                <i class="bi bi-check-circle-fill text-warning"></i> <span class="text-dark">Des tarifs adaptés à tous</span>
+                </li>
+                <li>
+                <i class="bi bi-check-circle-fill text-warning"></i> <span class="text-dark">Un cadeau exclusif pour chaque ticket</span>
+                </li>
+            </ul>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4 offset-md-4 text-center mt-5 mb-5">
-            <a href="html/ticket.html" class="btn btn-warning btn-lg">Acheter un Ticket</a>
+        <div class="row mt-5">
+            <div class="text-center mt-5">
+            <div class="evenement text-center text-white border border-3 p-4 bg-gradient rounded shadow-lg">
+                <h2 class="mb-4 text-uppercase fw-bold" style="letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">Découvrez Nos Tarifs</h2>
+                <div class="d-flex justify-content-center align-items-center">
+                <div class="me-5"></div>
+                    <h4 class="text-warning"><i class="bi bi-cash-coin"></i> Standard</h4>
+                    <p class="fs-5">50&nbsp;€</p>
+                </div>
+                <div>
+                    <h4 class="text-warning"><i class="bi bi-cash-coin"></i> VIP</h4>
+                    <p class="fs-5">70&nbsp;€</p>
+                </div>
+                </div>
+                <p class="mt-4 fst-italic">
+                <i class="bi bi-star-fill text-warning"></i> <span class="text-light" style="text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);">Vivez une expérience inoubliable avec nos tickets VIP, incluant des avantages exclusifs !</span>
+                </p>
+            </div>
+            </div>
         </div>
-
-    </div>
-
+        <div class="row mt-5">
+            <div class="text-center">
+            <h3 class="fw-bold text-white">Un cadeau pour vous !</h3>
+            <p class="fs-5 text-white">Pour chaque ticket acheté, recevez un t-shirt exclusif en cadeau.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 offset-md-4 text-center mt-5 mb-5">
+            <a href="html/ticket.html" class="btn btn-warning btn-lg shadow-lg">Acheter un Ticket</a>
+            </div>
+        </div>
+        </div>
 
     
 
