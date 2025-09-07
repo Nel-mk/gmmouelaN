@@ -61,8 +61,25 @@ generateParticipantFields();
 entreQuantite.addEventListener("input", generateParticipantFields);
 ticketType.addEventListener("change", generateParticipantFields);
 
+
 // PayPal Buttons
 paypal.Buttons({
+     onClick: function(data, actions) {
+        // Vérifie si tous les champs des participants sont remplis
+        const inputs = document.querySelectorAll("#containerNom input");
+        let tousremplis = true;
+
+        inputs.forEach(input => {
+            if (input.value.trim() === "") tousremplis = false;
+        });
+
+        if (!tousremplis) {
+            alert("Veuillez remplir tous les champs avant de payer !");
+            return actions.reject(); // bloque le paiement
+        }
+
+        return actions.resolve(); // autorise le paiement
+    },
     createOrder: function(data, actions) {
         const price = parseFloat(ticketType.selectedOptions[0].dataset.price);
         const quantity = parseInt(entreQuantite.value);
@@ -70,27 +87,100 @@ paypal.Buttons({
 
         return actions.order.create({
             purchase_units: [{
-                amount: {
-                    value: total
-                }
+                amount: { value: total }
             }]
         });
     },
     onApprove: function(data, actions) {
         return actions.order.capture().then(function(details) {
-            alert("Transaction OK : " + details.payer.name.given_name +
-                  "\nMontant payé : " + details.purchase_units[0].amount.value + " €");
+            
+            // 1️⃣ Récupérer toutes les informations des participants
+            const formData = {
+                ticketType: ticketType.value,
+                quantity: parseInt(entreQuantite.value),
+                transactionId: details.id,
+                amount: details.purchase_units[0].amount.value,
+                participants: []
+            };
+
+            document.querySelectorAll("#containerNom div").forEach(div => {
+                const inputs = div.querySelectorAll("input");
+                formData.participants.push({
+                    nom: inputs[0].value,
+                    email: inputs[1].value,
+                    tel: inputs[2].value
+                });
+            });
+
+            // 2️⃣ Envoyer les infos au backend Node.js
+            fetch("http://localhost:5000/api/tickets", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Paiement OK et ticket enregistré !");
+                    // Nettoyer le formulaire
+                    clearFormAfterSuccess(details.id);
+                } else {
+                    alert("Paiement OK mais problème lors de l'enregistrement !");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Erreur de communication avec le serveur !");
+            });
+
         });
     },
     onError: function(err) {
         console.error("Payment Error:", err);
         alert("Paiement échoué !");
     },
-    // Limiter les méthodes de paiement affichées
     funding: {
         disallowed: [paypal.FUNDING.CREDIT, paypal.FUNDING.ELV, paypal.FUNDING.ITAU, paypal.FUNDING.BANCONTACT, paypal.FUNDING.SOFORT, paypal.FUNDING.MYBANK]
     }
 }).render("#paypal-button-container");
+
+
+
+// Fonctions de nettoyage du formulaire
+function clearFormAfterSuccess(transactionId) {
+    // Vider tous les champs
+    document.querySelectorAll('#containerNom input').forEach(input => {
+        input.value = '';
+    });
+    
+    // Réinitialiser les sélecteurs
+    ticketType.value = '';
+    entreQuantite.value = '1';
+    
+    // Afficher le message de succès dans le container PayPal
+    paypalContainer.innerHTML = `
+        <div class="alert alert-success text-center">
+            <i class="bi bi-check-circle-fill fs-1 text-success"></i>
+            <h4>Paiement réussi !</h4>
+            <p><strong>Transaction ID:</strong> ${transactionId}</p>
+            <p>Vos tickets ont été enregistrés avec succès.</p>
+            <button class="btn btn-primary mt-3" onclick="resetForm()">
+                Nouvelle commande
+            </button>
+        </div>
+    `;
+    
+    // Désactiver le formulaire
+    const form = document.querySelector('form') || document.body;
+    form.style.opacity = '0.6';
+    form.style.pointerEvents = 'none';
+}
+
+function resetForm() {
+    // Recharger la page pour tout réinitialiser
+    location.reload();
+}
+
 
 
 // Récupérer tous les liens du menu
