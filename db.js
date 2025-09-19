@@ -7,41 +7,53 @@ console.log('User:', process.env.DB_USER);
 console.log('Database:', process.env.DB_NAME);
 console.log('Password défini:', process.env.DB_PASS ? 'Oui' : 'Non');
 
-// Configuration de la connexion MySQL
-const db = mysql.createConnection({
+// Utiliser un pool au lieu d'une connexion unique
+const pool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || '',
     database: process.env.DB_NAME || 'ticket_platform',
-    charset: 'utf8mb4'
+    charset: 'utf8mb4',
+    // Configuration du pool
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    acquireTimeout: 60000,
+    timeout: 60000,
+    reconnect: true,
+    // Gestion des connexions fermées
+    handleDisconnects: true
 });
 
-// Test de la connexion
-db.connect((err) => {
+// Test de connexion
+pool.getConnection((err, connection) => {
     if (err) {
-        console.error('❌ Erreur de connexion à la base de données:');
+        console.error(' Erreur de connexion à la base de données:');
         console.error('Code:', err.code);
         console.error('Message:', err.message);
         
-        // Suggestions basées sur l'erreur
         if (err.code === 'ER_ACCESS_DENIED_NO_PASSWORD_ERROR') {
             console.log('\n🔧 Solutions possibles:');
             console.log('1. Vérifier le fichier .env');
             console.log('2. Créer un utilisateur MySQL dédié');
-            console.log('3. Utiliser sudo mysql au lieu de mysql -p');
         }
         return;
     }
-    console.log('✅ Connexion réussie à la base de données MySQL');
+    
+    console.log(' Connexion réussie à la base de données MySQL');
+    connection.release(); // Libérer la connexion de test
 });
 
-// Gestion des erreurs de connexion
-db.on('error', (err) => {
-    console.error('❌ Erreur base de données:', err.code, err.message);
+// Gestion des erreurs du pool
+pool.on('connection', (connection) => {
+    console.log('Nouvelle connexion établie:', connection.threadId);
+});
+
+pool.on('error', (err) => {
+    console.error(' Erreur pool de connexions:', err.code, err.message);
     if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-        console.log('🔄 Tentative de reconnexion...');
-        // Ne pas reconnecter automatiquement pour éviter les boucles
+        console.log(' Reconnexion automatique...');
     }
 });
 
-module.exports = db;
+module.exports = pool;
