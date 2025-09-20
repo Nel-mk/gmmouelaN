@@ -1,3 +1,6 @@
+console.log('DEBUG - DATABASE_URL présente:', !!process.env.DATABASE_URL);
+console.log('DEBUG - DATABASE_URL:', process.env.DATABASE_URL ? 'Définie' : 'Manquante');
+
 const { Pool } = require('pg');
 require('dotenv').config();
 
