@@ -113,7 +113,7 @@ paypal.Buttons({
             });
 
             // 2️⃣ Envoyer les infos au backend Node.js
-            fetch("http://localhost:5000/api/tickets", {
+            fetch("http:gmmouela.onrender.com/api/tickets", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData)
