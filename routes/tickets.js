@@ -92,7 +92,7 @@ const verifyStockAvailability = async (ticketType, quantity) => {
     }
 };
 
-// Transaction atomique sécurisée (adaptée PostgreSQL)
+// Transaction atomique sécurisée (adaptée PostgreSQL - CORRECTION FOR UPDATE)
 const insertTicketsAtomically = async (ticketType, quantity, transactionId, amount, participants) => {
     const client = await pool.connect();
     
@@ -101,26 +101,32 @@ const insertTicketsAtomically = async (ticketType, quantity, transactionId, amou
         
         await client.query('BEGIN');
         
-        // ÉTAPE 1 : Re-vérifier le stock AVEC VERROU
+        // ÉTAPE 1 : Re-vérifier le stock AVEC VERROU (CORRIGÉ pour PostgreSQL)
         const lockQuery = `
-            SELECT 
-                (e.places_${ticketType}_total - COALESCE(SUM(t.quantite), 0)) as places_disponibles
-            FROM evenements e
-            LEFT JOIN tickets t ON e.id = t.evenement_id 
-                AND t.type = $1 
-                AND t.statut = 'confirmed'
-            WHERE e.id = 1
-            GROUP BY e.id
+            SELECT places_${ticketType}_total as places_total
+            FROM evenements
+            WHERE id = 1
             FOR UPDATE
         `;
         
-        const lockResult = await client.query(lockQuery, [ticketType]);
+        const stockQuery = `
+            SELECT COALESCE(SUM(quantite), 0) as places_vendues
+            FROM tickets
+            WHERE evenement_id = 1 
+                AND type = $1 
+                AND statut = 'confirmed'
+        `;
+        
+        const lockResult = await client.query(lockQuery);
+        const stockResult = await client.query(stockQuery, [ticketType]);
         
         if (lockResult.rows.length === 0) {
             throw new Error('Événement non trouvé');
         }
         
-        const placesDisponibles = lockResult.rows[0].places_disponibles;
+        const placesTotal = lockResult.rows[0].places_total;
+        const placesVendues = parseInt(stockResult.rows[0].places_vendues);
+        const placesDisponibles = placesTotal - placesVendues;
         
         if (placesDisponibles < quantity) {
             throw new Error(`Stock insuffisant: ${placesDisponibles} places disponibles, ${quantity} demandées`);
