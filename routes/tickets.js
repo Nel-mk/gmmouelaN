@@ -238,19 +238,20 @@ router.post('/', validateTicketData, async (req, res) => {
         // ÉTAPE 4 : Envoyer email automatiquement
         try {
             const emailResult = await sendTicketEmail({
-                participants: participants,
+                participants: insertResult.tickets,
                 transactionId: transactionId,
                 amount: amount,
                 ticketType: ticketType
             });
-            
+            console.log('📬 Résultat email:', emailResult); //**A OTER ** */
             if (emailResult.success) {
                 console.log('📧 Email envoyé avec succès');
             } else {
-                console.error('❌ Échec envoi email:', emailResult.error);
+                console.error(' Échec envoi email:', emailResult.error);
             }
         } catch (emailError) {
-            console.error('❌ Erreur envoi email:', emailError);
+            console.error(' Erreur envoi email:', emailError.message);
+            console.error('Stack:', emailError.stack);
             // On continue même si l'email échoue
         }
         
