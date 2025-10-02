@@ -1,19 +1,12 @@
-// services/emailService.js - Version avec QR Codes en pièces jointes
+// services/emailService.js - Version SendGrid pour Render
 
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 const { genererQRTicket } = require('./qrService');
 
-const createTransporter = () => {
-    return nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.GMAIL_USER,
-            pass: process.env.GMAIL_PASSWORD
-        }
-    });
-};
+// Configuration SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// 🎓 LEÇON : Template HTML modifié pour référencer les QR Codes en pièces jointes
+// Template HTML du ticket avec QR Codes
 const createTicketEmailHTML = (ticketData, qrCodes) => {
     const { participants, concert, transactionId, totalAmount, ticketType } = ticketData;
     
@@ -93,8 +86,6 @@ const createTicketEmailHTML = (ticketData, qrCodes) => {
                 color: #ff6b35;
                 font-size: 18px;
             }
-            
-            /* 🎓 NOUVEAU : Styles pour QR Code en pièce jointe */
             .qr-attachment-info {
                 background: #e8f5e8;
                 border: 2px dashed #4caf50;
@@ -118,7 +109,6 @@ const createTicketEmailHTML = (ticketData, qrCodes) => {
                 color: #666;
                 font-size: 14px;
             }
-            
             .qr-instructions {
                 background: #e3f2fd;
                 padding: 15px;
@@ -166,31 +156,28 @@ const createTicketEmailHTML = (ticketData, qrCodes) => {
     </head>
     <body>
         <div class="container">
-            <!-- Header -->
             <div class="header">
                 <div class="logo">🎵 GM MOUELA</div>
                 <div class="subtitle">Vos tickets avec QR Codes</div>
             </div>
 
-            <!-- Bienvenue -->
             <h2> Félicitations ${participants[0].nom} !</h2>
-            <p>Votre commande a été confirmée avec succès. Vos QR Codes sont en <strong>pièces jointes</strong> de cet email !</p>
+            <p>Votre commande a été confirmée avec succès. Vos QR Codes sont en pièces jointes de cet email !</p>
 
-            <!--  NOUVEAU : Instructions QR Codes en pièces jointes -->
             <div class="qr-instructions">
-                <h3>📱 Vos QR Codes sont en pièces jointes !</h3>
+                <h3> Vos QR Codes sont en pièces jointes !</h3>
                 <ul>
-                    <li><strong>📎 Pièces jointes :</strong> Téléchargez les images QR Code ci-dessous</li>
-                    <li><strong> Sur téléphone :</strong> Sauvegardez les images QR dans vos photos</li>
-                    <li><strong> Impression :</strong> Imprimez les QR Codes sur papier</li>
-                    <li><strong>✅ À l'entrée :</strong> Montrez votre QR Code (écran ou papier)</li>
+                    <li> Pièces jointes : Téléchargez les images QR Code ci-dessous</li>
+                    <li> Sur téléphone : Sauvegardez les images QR dans vos photos</li>
+                    <li> Impression : Imprimez les QR Codes sur papier</li>
+                    <li> À l'entrée : Montrez votre QR Code (écran ou papier)</li>
+                    <li>⚡ Rapide : Scan en 2 secondes</li>
                 </ul>
             </div>
 
-            <!-- Info Concert -->
             <div class="ticket-info">
                 <h2>${concert.nom}</h2>
-                <p><strong>📅 Date :</strong> ${new Date(concert.date_debut).toLocaleDateString('fr-FR', { 
+                <p><strong> Date :</strong> ${new Date(concert.date_debut).toLocaleDateString('fr-FR', { 
                     weekday: 'long', 
                     year: 'numeric', 
                     month: 'long', 
@@ -201,7 +188,6 @@ const createTicketEmailHTML = (ticketData, qrCodes) => {
                 <p><strong> Lieu :</strong> ${concert.lieu}</p>
             </div>
 
-            <!-- Détails Commande -->
             <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 20px 0;">
                 <h3 style="margin-top: 0; color: #ff6b35;">📋 Détails de votre commande</h3>
                 
@@ -223,8 +209,7 @@ const createTicketEmailHTML = (ticketData, qrCodes) => {
                 </div>
             </div>
 
-            <!-- 🎓 NOUVEAU : Liste des QR Codes en pièces jointes -->
-            <h3 style="color: #ff6b35;"> Vos QR Codes (Pièces jointes)</h3>
+            <h3 style="color: #ff6b35;">🎫 Vos QR Codes (Pièces jointes)</h3>
             ${participants.map((participant, index) => {
                 const qrCode = qrCodes[index];
                 return `
@@ -234,7 +219,6 @@ const createTicketEmailHTML = (ticketData, qrCodes) => {
                     <p><strong>Email :</strong> ${participant.email}</p>
                     <p><strong>Téléphone :</strong> ${participant.telephone}</p>
                     
-                    <!-- Information sur la pièce jointe QR Code -->
                     ${qrCode && qrCode.qrImage ? `
                         <div class="qr-attachment-info">
                             <span class="attachment-icon">📎</span>
@@ -246,37 +230,35 @@ const createTicketEmailHTML = (ticketData, qrCodes) => {
                         </div>
                     ` : `
                         <div style="background: #ffebee; color: #c62828; padding: 15px; border-radius: 5px;">
-                            ⚠️ Erreur génération QR Code - Contactez le support
+                            Erreur génération QR Code - Contactez le support
                         </div>
                     `}
                 </div>
                 `;
             }).join('')}
 
-            <!-- Informations importantes -->
             <div class="important-info">
-                <h3>⚠️ Instructions importantes</h3>
+                <h3> Instructions importantes</h3>
                 <ul>
-                    <li><strong> Téléchargez</strong> les QR Codes depuis les pièces jointes</li>
-                    <li><strong> Sauvegardez</strong> les images QR sur votre téléphone</li>
-                    <li><strong> OU imprimez</strong> cette page avec les QR Codes</li>
-                    <li><strong>Un QR par personne</strong> - Chaque participant doit avoir son QR</li>
-                    <li><strong>Pièce d'identité :</strong> Obligatoire + QR Code</li>
+                    <li> Téléchargez les QR Codes depuis les pièces jointes</li>
+                    <li> Sauvegardez les images QR sur votre téléphone</li>
+                    <li> OU imprimez cette page avec les QR Codes</li>
+                    <li>Un QR par personne - Chaque participant doit avoir son QR</li>
+                    <li>Arrivée : 30 minutes avant pour éviter la queue</li>
+                    <li>Pièce d'identité : Obligatoire + QR Code</li>
                 </ul>
             </div>
 
-            <!-- Support -->
             <div class="support">
-                <h3>🆘 Besoin d'aide ?</h3>
+                <h3> Besoin d'aide ?</h3>
                 <p>Pour toute question concernant vos QR Codes ou votre commande :</p>
                 <p><strong>Email :</strong> gmmouela@gmail.com</p>
                 <p><strong>Référence :</strong> ${transactionId}</p>
                 <p><strong>Problème QR Codes :</strong> Vérifiez vos pièces jointes d'abord !</p>
             </div>
 
-            <!-- Footer -->
             <div class="footer">
-                <p>🎵 À bientôt au concert GM MOUELA ! 🎵</p>
+                <p> À bientôt au concert GM MOUELA ! </p>
                 <p style="color: #999; font-size: 12px;">
                     GM MOUELA - Concert Presentation<br>
                     QR Codes en pièces jointes - Système sécurisé
@@ -288,24 +270,21 @@ const createTicketEmailHTML = (ticketData, qrCodes) => {
     `;
 };
 
-// 🎓 LEÇON : Fonction principale avec QR Codes en pièces jointes
+// Fonction principale d'envoi avec SendGrid
 const sendTicketEmail = async (ticketData) => {
     try {
-        console.log(' Préparation envoi email tickets avec QR Codes en pièces jointes...');
+        console.log(' Préparation envoi email tickets avec SendGrid...');
         
-        const transporter = createTransporter();
-        
-        // ÉTAPE 1 : Générer les QR Codes pour chaque participant
+        // ÉTAPE 1 : Générer les QR Codes
         console.log(' Génération des QR Codes...');
         const qrCodes = [];
-        const attachments = []; // ← NOUVEAU : Pour les pièces jointes
+        const attachments = [];
         
         for (let i = 0; i < ticketData.participants.length; i++) {
             const participant = ticketData.participants[i];
             
-            // Créer les données pour le QR Code
             const qrData = {
-                id: participant.ticketId || (Date.now() + i),
+                id: participant.id || (Date.now() + i),
                 nom: participant.nom,
                 type: ticketData.ticketType,
                 transaction_id: ticketData.transactionId
@@ -313,30 +292,24 @@ const sendTicketEmail = async (ticketData) => {
             
             console.log(`    QR Code ${i + 1}/${ticketData.participants.length} pour ${participant.nom}...`);
             
-            // Générer le QR Code
             const qrResult = await genererQRTicket(qrData);
             
             if (qrResult.success !== false) {
                 qrCodes.push(qrResult);
                 
-                // 🎓 NOUVEAU : Ajouter le QR Code comme pièce jointe
-                // Extraire les données base64 de l'image
                 const base64Data = qrResult.qrImage.replace(/^data:image\/png;base64,/, '');
-                
-                // Nom du fichier QR Code
                 const filename = `QR_${participant.nom.replace(/\s+/g, '_')}_${ticketData.ticketType.toUpperCase()}.png`;
                 
-                // Ajouter aux pièces jointes
                 attachments.push({
-                    filename: filename,
                     content: base64Data,
-                    encoding: 'base64',
-                    cid: `qr_${i}` // ID unique pour référencer dans le HTML si besoin
+                    filename: filename,
+                    type: 'image/png',
+                    disposition: 'attachment'
                 });
                 
-                console.log(`    QR Code généré et ajouté en pièce jointe: ${filename}`);
+                console.log(`    QR Code généré et ajouté: ${filename}`);
             } else {
-                console.error(`   ❌ Erreur QR Code pour ${participant.nom}:`, qrResult.error);
+                console.error(`    Erreur QR Code pour ${participant.nom}:`, qrResult.error);
                 qrCodes.push({
                     qrImage: null,
                     qrText: 'ERREUR_GENERATION',
@@ -346,16 +319,14 @@ const sendTicketEmail = async (ticketData) => {
         }
         
         console.log(` QR Codes générés: ${qrCodes.filter(qr => qr.qrImage).length}/${ticketData.participants.length}`);
-        console.log(` Pièces jointes créées: ${attachments.length}`);
         
-        // ÉTAPE 2 : Récupérer les détails du concert
+        // ÉTAPE 2 : Détails du concert
         const concertInfo = {
             nom: 'GM MOUELA CONCERT PRESENTATION',
             date_debut: '2025-12-13 15:00:00',
             lieu: 'TEATRO MOLARCHI'
         };
         
-        // ÉTAPE 3 : Préparer les données pour le template
         const emailData = {
             participants: ticketData.participants,
             concert: concertInfo,
@@ -364,22 +335,15 @@ const sendTicketEmail = async (ticketData) => {
             ticketType: ticketData.ticketType
         };
         
-        // ÉTAPE 4 : Configuration de l'email avec pièces jointes
-        const mailOptions = {
+        // ÉTAPE 3 : Configuration email SendGrid
+        const msg = {
+            to: ticketData.participants.map(p => p.email),
             from: {
-                name: 'GM MOUELA - Tickets & QR Codes',
-                address: process.env.GMAIL_USER
+                email: 'gmmouela@gmail.com',
+                name: 'GM MOUELA - Tickets & QR Codes'
             },
-            to: ticketData.participants.map(p => p.email).join(', '),
             subject: ` Vos tickets GM MOUELA avec QR Codes - ${ticketData.transactionId}`,
-            
-            // HTML avec références aux pièces jointes
             html: createTicketEmailHTML(emailData, qrCodes),
-            
-            // 🎓 NOUVEAU : Pièces jointes avec les QR Codes
-            attachments: attachments,
-            
-            // Version texte améliorée
             text: `
 Bonjour ${ticketData.participants[0].nom},
 
@@ -398,41 +362,39 @@ Concert : GM MOUELA CONCERT PRESENTATION
 Date : 13 décembre 2025 à 15h00
 Lieu : TEATRO MOLARCHI
 
-QR Codes en pièces jointes :
-${ticketData.participants.map((p, i) => `${i + 1}. QR_${p.nom.replace(/\s+/g, '_')}_${ticketData.ticketType.toUpperCase()}.png`).join('\n')}
-
-⚠️ INSTRUCTIONS : 
+ INSTRUCTIONS : 
 1. Téléchargez les QR Codes (pièces jointes)
 2. Sauvegardez sur votre téléphone OU imprimez
 3. Montrez à l'entrée (QR Code obligatoire)
 
 Besoin d'aide ? gmmouela@gmail.com
 
-GM MOUELA - QR Codes en pièces jointes
-            `
+GM MOUELA
+            `,
+            attachments: attachments
         };
         
-        // ÉTAPE 5 : Envoi de l'email avec pièces jointes
-        const info = await transporter.sendMail(mailOptions);
+        // ÉTAPE 4 : Envoi via SendGrid
+        await sgMail.send(msg);
         
-        console.log('✅ Email avec QR Codes (pièces jointes) envoyé avec succès !');
-        console.log(' Message ID:', info.messageId);
+        console.log(' Email envoyé avec succès via SendGrid !');
         console.log(' Destinataires:', ticketData.participants.map(p => p.email).join(', '));
         console.log(' Pièces jointes:', attachments.length);
-        console.log(' QR Codes attachés:', attachments.map(att => att.filename).join(', '));
         
         return {
             success: true,
-            messageId: info.messageId,
             recipients: ticketData.participants.map(p => p.email),
             qrCodesGenerated: qrCodes.length,
             qrCodesSuccess: qrCodes.filter(qr => qr.qrImage).length,
-            attachments: attachments.length,
-            attachmentNames: attachments.map(att => att.filename)
+            attachments: attachments.length
         };
         
     } catch (error) {
-        console.error('❌ Erreur envoi email avec QR Codes (pièces jointes):', error);
+        console.error(' Erreur envoi email SendGrid:', error);
+        
+        if (error.response) {
+            console.error('SendGrid Error:', error.response.body);
+        }
         
         return {
             success: false,
@@ -442,16 +404,14 @@ GM MOUELA - QR Codes en pièces jointes
     }
 };
 
+// Test de configuration (optionnel)
 const testEmailConfig = async () => {
-    try {
-        const transporter = createTransporter();
-        await transporter.verify();
-        console.log('Configuration email validée !');
-        return true;
-    } catch (error) {
-        console.error('❌ Erreur configuration email:', error.message);
+    if (!process.env.SENDGRID_API_KEY) {
+        console.error(' SENDGRID_API_KEY non définie');
         return false;
     }
+    console.log(' SendGrid API Key configurée');
+    return true;
 };
 
 module.exports = {
